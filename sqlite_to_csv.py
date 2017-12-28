@@ -21,7 +21,7 @@ class SqliteToCsv:
         db = sqlite3.connect(self.sqlite_input)
         db.text_factory = str
         cur = db.cursor()
-        data = cur.execute("SELECT type, front, back, known FROM cards ORDER BY id DESC")
+        data = cur.execute("SELECT type, front, back, known FROM cards ORDER BY id ASC")
         self.__write_csv(data)
 
     def __write_csv(self, items):

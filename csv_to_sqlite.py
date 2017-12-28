@@ -30,7 +30,7 @@ class CsvToSqlite:
             cur.executescript(f.read())
 
         for item in items:
-            if len(item) is 4:
+            if len(item) is 4 and item[0].strip()[0] != '#':
                 cur.execute('INSERT INTO cards (type, front, back, known) VALUES (?, ?, ?, ?)',
                             item)
 
