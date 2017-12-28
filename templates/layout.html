@@ -20,15 +20,9 @@
                         <a class="navbar-brand" href="{{ url_for('index') }}">CS Flash Cards</a>
 
                         <ul class="nav navbar-nav navbar-right">
-                            {% if not session.logged_in %}
-                                <li><a href="{{ url_for('login') }}">log in</a></li>
-                            {% else %}
-                                <li><a href="{{ url_for('cards') }}">cards</a></li>
-                                <li><a href="{{ url_for('general') }}">general</a></li>
-                                <li><a href="{{ url_for('code') }}">code</a></li>
-                                <li>&nbsp;&nbsp;&nbsp;&nbsp;</li>
-                                <li><a href="{{ url_for('logout') }}">log out</a></li>
-                            {% endif %}
+                            <li><a href="{{ url_for('cards') }}">cards</a></li>
+                            <li><a href="{{ url_for('general') }}">general</a></li>
+                            <li><a href="{{ url_for('code') }}">code</a></li>
                         </ul>
                     </div>
                 </nav>

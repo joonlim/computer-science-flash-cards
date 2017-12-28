@@ -9,9 +9,7 @@ app.config.from_object(__name__)
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'db', 'cards.db'),
-    SECRET_KEY='development key',
-    USERNAME='admin',
-    PASSWORD='default'
+    SECRET_KEY='development key'
 ))
 app.config.from_envvar('CARDS_SETTINGS', silent=True)
 
@@ -57,16 +55,11 @@ def close_db(error):
 
 @app.route('/')
 def index():
-    if session.get('logged_in'):
-        return redirect(url_for('general'))
-    else:
-        return redirect(url_for('login'))
+    return redirect(url_for('general'))
 
 
 @app.route('/cards')
 def cards():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     db = get_db()
     query = '''
         SELECT id, type, front, back, known
@@ -80,8 +73,6 @@ def cards():
 
 @app.route('/filter_cards/<filter_name>')
 def filter_cards(filter_name):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
 
     filters = {
         "all":      "where 1 = 1",
@@ -105,8 +96,6 @@ def filter_cards(filter_name):
 
 @app.route('/add', methods=['POST'])
 def add_card():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     db = get_db()
     db.execute('INSERT INTO cards (type, front, back) VALUES (?, ?, ?)',
                [request.form['type'],
@@ -120,8 +109,6 @@ def add_card():
 
 @app.route('/edit/<card_id>')
 def edit(card_id):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     db = get_db()
     query = '''
         SELECT id, type, front, back, known
@@ -135,8 +122,6 @@ def edit(card_id):
 
 @app.route('/edit_card', methods=['POST'])
 def edit_card():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     selected = request.form.getlist('known')
     known = bool(selected)
     db = get_db()
@@ -163,8 +148,6 @@ def edit_card():
 
 @app.route('/delete/<card_id>')
 def delete(card_id):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     db = get_db()
     db.execute('DELETE FROM cards WHERE id = ?', [card_id])
     db.commit()
@@ -175,16 +158,12 @@ def delete(card_id):
 @app.route('/general')
 @app.route('/general/<card_id>')
 def general(card_id=None):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     return memorize("general", card_id)
 
 
 @app.route('/code')
 @app.route('/code/<card_id>')
 def code(card_id=None):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     return memorize("code", card_id)
 
 
@@ -246,35 +225,11 @@ def get_card_by_id(card_id):
 
 @app.route('/mark_known/<card_id>/<card_type>')
 def mark_known(card_id, card_type):
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     db = get_db()
     db.execute('UPDATE cards SET known = 1 WHERE id = ?', [card_id])
     db.commit()
     flash('Card marked as known.')
     return redirect(url_for(card_type))
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username or password!'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid username or password!'
-        else:
-            session['logged_in'] = True
-            session.permanent = True  # stay logged in
-            return redirect(url_for('cards'))
-    return render_template('login.html', error=error)
-
-
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)
-    flash("You've logged out")
-    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
